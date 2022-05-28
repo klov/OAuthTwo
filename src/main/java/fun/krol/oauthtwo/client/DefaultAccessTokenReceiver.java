@@ -1,6 +1,7 @@
 package fun.krol.oauthtwo.client;
 
 import fun.krol.oauthtwo.AccessToken;
+import fun.krol.oauthtwo.exception.OauthException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,7 +22,7 @@ public class DefaultAccessTokenReceiver implements AccessTokenReceiver {
         this.redirectUrl = redirectUrl;
     }
 
-     public AccessToken takeAccessTokens(String token, String state) throws IOException, InterruptedException {
+     public AccessToken takeAccessTokens(String token, String state) throws IOException, InterruptedException, OauthException {
         StringBuilder sb = new StringBuilder();
         sb.append("grant_type=authorization_code");
         sb.append("&code=" + token);
