@@ -1,7 +1,109 @@
-package fun.krol.oauthtwo.client;
+package `fun`.krol.oauthtwo.client;
 
-import static org.junit.jupiter.api.Assertions.*;
+import `fun`.krol.oauthtwo.AccessToken
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import `fun`.krol.oauthtwo.OAuthBuilder
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import java.util.*
+import kotlin.test.assertEquals
 
 class OAuthClientTest {
 
+    companion object {
+
+        val port = 8006;
+
+        val wireMockServer = WireMockServer(port);
+
+        @BeforeAll
+        @JvmStatic
+        internal fun setup() {
+            wireMockServer.start()
+        }
+
+    }
+
+    @BeforeEach
+    internal fun reset() {
+        wireMockServer.resetAll()
+    }
+
+    @Test
+    fun testAuthorizationRequest() {
+
+        val clientId = UUID.randomUUID().toString()
+        val client = OAuthBuilder()
+            .setAutorisationbaseHost("http://localhost:$port/oauth")
+            .setRedirectUrl("https://fun.krol/oauth")
+            .setClientId(clientId)
+            .buildClient()
+
+
+        val oauthUrl = client.identifyСlient(setOf("READ", "UPDATE")).toString()
+        assertEquals(
+            "http://localhost:8002/oauthresponse_type=code&client_id=$clientId&redirect_uri=https://fun.krol/oauth&scops=READ UPDATE",
+            oauthUrl
+        )
+    }
+
+
+    @Test
+    fun testTakeAccessTokens() {
+        val clientId = UUID.randomUUID().toString()
+        val accessToken = UUID.randomUUID().toString()
+        val client = OAuthBuilder()
+            .setAutorisationbaseHost("http://localhost:$port/oauth")
+            .setTokenAccessEndpont("/token")
+            .setRedirectUrl("https://fun.krol/oauth")
+            .setClientId(clientId)
+            .buildClient()
+
+        val expectedToken = AccessToken(
+            "v1vQXiU5gN6DJzWdnRK6YYnoDe3b5pjd",
+            "bearer",
+            7200,
+            "7T2g8xeogsgpG3whezFQ2ZKckabiwCgS",
+            setOf()
+        );
+
+        wireMockServer.stubFor(
+            WireMock.post("/oauth/token")
+                .willReturn(
+                    WireMock.ok()
+                        .withHeader("Content-Type", "text/plain")
+                        .withBody(
+                            ObjectMapper().writeValueAsString(
+                                AccessToken(
+                                    "v1vQXiU5gN6DJzWdnRK6YYnoDe3b5pjd",
+                                    "bearer",
+                                    7200,
+                                    "7T2g8xeogsgpG3whezFQ2ZKckabiwCgS",
+                                    null
+                                )
+                            )
+                        )
+                )
+        );
+
+
+        val token = client.takeAccessTokens(accessToken)
+
+
+        wireMockServer.verify(
+            WireMock.postRequestedFor(WireMock.urlEqualTo("/oauth/token"))
+                .withRequestBody(equalTo("grant_type=authorization_code&code=$accessToken&client_id=$clientId&redirect_uri=https://fun.krol/oauth"))
+        )
+
+    }
+
+    @Test
+    fun test() {
+
+    }
 }

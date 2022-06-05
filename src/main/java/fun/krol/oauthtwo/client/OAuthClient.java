@@ -1,6 +1,7 @@
 package fun.krol.oauthtwo.client;
 
 import fun.krol.oauthtwo.AccessToken;
+import fun.krol.oauthtwo.exception.OauthException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -18,11 +19,11 @@ public class OAuthClient implements СlientIdentifier, AccessTokenReceiver {
     }
 
     @Override
-    public AccessToken takeAccessTokens(String token, String state) throws IOException, InterruptedException {
+    public AccessToken takeAccessTokens(String token, String state) throws OauthException {
         return accessTokenReceiver.takeAccessTokens(token,state);
     }
 
-    public AccessToken takeAccessTokens(String token) throws IOException, InterruptedException {
+    public AccessToken takeAccessTokens(String token) throws OauthException {
         return this.takeAccessTokens(token,"");
     }
 

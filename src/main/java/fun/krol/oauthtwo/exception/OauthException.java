@@ -1,4 +1,9 @@
 package fun.krol.oauthtwo.exception;
 
-public class OauthException  extends RuntimeException{
+import java.io.IOException;
+
+public class OauthException  extends IOException {
+    public OauthException(String message) {
+        super(message);
+    }
 }
