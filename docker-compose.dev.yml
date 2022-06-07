@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  worker:
+    restart: always
+    image: rpc-module:latest
+    build:
+      context: .
+      args:
+        - PIP_INDEX_URL
+        - PIP_TRUSTED_HOST
+    env_file:
+      - config.env
+    network_mode: host
+
+  rabbitmq:
+    restart: always
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672

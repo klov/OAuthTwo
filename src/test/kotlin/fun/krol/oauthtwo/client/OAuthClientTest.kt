@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
-import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -102,8 +101,4 @@ class OAuthClientTest {
 
     }
 
-    @Test
-    fun test() {
-
-    }
 }
