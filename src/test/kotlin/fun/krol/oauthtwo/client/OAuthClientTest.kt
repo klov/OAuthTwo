@@ -9,21 +9,30 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.equalTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import org.junit.jupiter.api.AfterAll
 import java.util.*
 import kotlin.test.assertEquals
+
 
 class OAuthClientTest {
 
     companion object {
 
-        val port = 8006;
+        val port = 8088
+        @JvmStatic val wireMockServer = WireMockServer(port)
 
-        val wireMockServer = WireMockServer(port);
 
         @BeforeAll
         @JvmStatic
         internal fun setup() {
             wireMockServer.start()
+        }
+
+        @AfterAll
+        @JvmStatic
+        internal fun end() {
+            wireMockServer.stop()
         }
 
     }
@@ -39,14 +48,15 @@ class OAuthClientTest {
         val clientId = UUID.randomUUID().toString()
         val client = OAuthBuilder()
             .setAutorisationbaseHost("http://localhost:$port/oauth")
-            .setRedirectUrl("https://fun.krol/oauth")
+            .setRedirectUrl("http://fun.krol/oauth")
+            .setTokenAccessEndpont("/token")
             .setClientId(clientId)
             .buildClient()
 
 
         val oauthUrl = client.identifyСlient(setOf("READ", "UPDATE")).toString()
         assertEquals(
-            "http://localhost:8002/oauthresponse_type=code&client_id=$clientId&redirect_uri=https://fun.krol/oauth&scops=READ UPDATE",
+            "http://localhost:$port/oauthresponse_type=code&client_id=$clientId&redirect_uri=http://fun.krol/oauth&scops=READ UPDATE",
             oauthUrl
         )
     }
@@ -59,7 +69,7 @@ class OAuthClientTest {
         val client = OAuthBuilder()
             .setAutorisationbaseHost("http://localhost:$port/oauth")
             .setTokenAccessEndpont("/token")
-            .setRedirectUrl("https://fun.krol/oauth")
+            .setRedirectUrl("http://fun.krol/oauth")
             .setClientId(clientId)
             .buildClient()
 
@@ -96,7 +106,7 @@ class OAuthClientTest {
 
         wireMockServer.verify(
             WireMock.postRequestedFor(WireMock.urlEqualTo("/oauth/token"))
-                .withRequestBody(equalTo("grant_type=authorization_code&code=$accessToken&client_id=$clientId&redirect_uri=https://fun.krol/oauth"))
+                .withRequestBody(equalTo("grant_type=authorization_code&code=$accessToken&client_id=$clientId&redirect_uri=http://fun.krol/oauth"))
         )
 
     }
